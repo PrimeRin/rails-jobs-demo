@@ -100,3 +100,56 @@ config.active_job.queue_adapter = :sidekiq
 bundle exec sidekiq
 ```
 By default, Sidekiq will look for jobs in Redis on localhost:6379.
+
+
+## Test the sidekiq and redis by creating Job
+Now, let's create a Sidekiq job. You can generate a job using the Rails generator:
+
+```bash
+rails generate job ExampleJob
+```
+
+This will create a file in app/jobs/example_job.rb. Modify this file as follows:
+
+```bash
+class ExampleJob
+  include Sidekiq::Job
+
+  def perform(*args)
+    # Simulate a long-running task
+    puts "Executing Sidekiq Job with args: #{args.inspect}"
+
+    # Sleep for 10 seconds to mock job processing time
+    sleep(10)
+
+    # After the sleep, job continues
+    puts "Job completed after sleeping for 10 seconds."
+  end
+end
+```
+## Test the Job
+Now, you can test if everything is working by triggering the job. For example, in the Rails console:
+
+```bash
+ExampleJob.perform_async('Hello', 'Sidekiq')
+```
+
+### How to check the queue count 
+```bash
+require 'sidekiq/api' 
+
+queue = Sidekiq::Queue.new
+job_count = queue.size
+puts "Number of jobs in the default queue: #{job_count}"
+```
+
+### How to clear the queue
+
+```bash
+require 'sidekiq/api'  
+
+# Access the default queue
+default_queue = Sidekiq::Queue.new
+default_queue.clear
+puts "Default queue cleared. Current job count: #{default_queue.size}"
+```
